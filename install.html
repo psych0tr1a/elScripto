@@ -1,0 +1,214 @@
+<?php
+
+if(file_exists("./config.html")){
+	die("Delete config.php to continue");
+}
+
+if(isset($_POST['config'])){
+
+	$servername = $_POST['dbhost'];
+	$username = $_POST['dbuser'];
+	$password = $_POST['dbpass'];
+
+	$conn = new mysqli($servername, $username, $password);
+	if ($conn->connect_error) {
+		die("Connection failed: " . $conn->connect_error);
+	} 
+
+	$sql = "CREATE DATABASE elScripto";
+	if ($conn->query($sql) === TRUE) {
+		echo "Database created successfully<br>";
+	} else {
+		die("Error creating database: " . $conn->error);
+	}
+
+	$conn->close();
+
+	$conn2 = new mysqli($servername, $username, $password, "elScripto");
+	if ($conn2->connect_error) {
+		die("Connection failed: " . $conn2->connect_error);
+	} 
+
+	$sql = "CREATE TABLE reports (
+		id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, 
+        date VARCHAR(20),
+        ip VARCHAR(15),
+        useragent BLOB,
+        referrer BLOB,
+		cookie BLOB,
+		storages BLOB,
+		DOM BLOB,
+        screenshot BLOB,
+        custom BLOB,
+        exploitid INT(6)
+	)";
+
+	$sql2 = "CREATE TABLE exploits (
+		id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, 
+		code BLOB,
+		title BLOB
+	)";
+
+    $sql3 = "INSERT INTO exploits (code,title) VALUES (
+    '',
+    'Blind XSS'
+    )";
+
+	if ($conn2->query($sql) === TRUE) {
+	    echo "Table reports created successfully<br>";
+	} else {
+	    die("Error creating table: " . $conn2->error);
+	}
+
+	if ($conn2->query($sql2) === TRUE) {
+	    echo "Table exploits created successfully<br>";
+	} else {
+	    die("Error creating table: " . $conn2->error);
+	}
+
+    if ($conn2->query($sql3) === TRUE) {
+        echo "Added demo exploit Joomla<br>";
+    } else {
+        die("Error when adding exploit: " . $conn2->error);
+    }
+
+	$conn2->close();
+
+	$config = "<?php\n\$dblocation = \"".$_POST['dbhost']."\";\n\$dbuser = \"".$_POST['dbuser']."\";\n\$dbpass = \"".$_POST['dbpass']."\";\n\$dbname = \"elScripto\";\n\$adminlogin = \"".$_POST['login']."\";\n\$adminpass = \"".$_POST['password']."\";\n?>";
+
+	file_put_contents ("./config.html", $config);
+
+	echo("Config file saved! Redirecting to main page!<br>");
+	die("<script>setTimeout(function(){location = './index.html'},1500)</script>");
+}
+
+?>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>el Scripto install</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="css/sb-admin.css" rel="stylesheet">
+
+    <!-- Morris Charts CSS -->
+    <link href="css/plugins/morris.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+
+    <div>
+
+        
+
+        <div id="page-wrapper">
+
+            <div class="container">
+
+                <!-- Page Heading -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 class="page-header">
+                            Setup your el Scripto!
+                        </h1>
+                        <ol class="breadcrumb">
+                            <li class="active">
+                                <i class="fa fa-wrench"></i> Setup
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+                <!-- /.row -->
+
+
+
+
+                <div class="row">
+                    <form class="form-horizontal" method="POST">
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="email">Database address:</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="dbhost" placeholder="localhost">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="pwd">Database username:</label>
+                        <div class="col-sm-10"> 
+                            <input type="text" class="form-control" name="dbuser" placeholder="root?">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="pwd">Database password:</label>
+                        <div class="col-sm-10"> 
+                            <input type="password" class="form-control" name="dbpass" placeholder="Database password">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="pwd">Admin login:</label>
+                        <div class="col-sm-10"> 
+                            <input type="text" class="form-control" name="login" placeholder="Admin">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="pwd">Admin password:</label>
+                        <div class="col-sm-10"> 
+                            <input type="password" class="form-control" name="password" placeholder="123456 :D">
+                        </div>
+                    </div>
+                    <div class="form-group"> 
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <input type="hidden" name="config" value="config">
+                            <button type="submit" class="btn btn-default">Setup!</button>
+                        </div>
+                    </div>
+                    </form>
+                </div>
+                <!-- /.row -->
+                <!-- /.row -->
+
+            </div>
+            <!-- /.container-fluid -->
+
+        </div>
+        <!-- /#page-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+
+    <!-- jQuery -->
+    <script src="js/jquery.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
+
+    <!-- Morris Charts JavaScript -->
+    <script src="js/plugins/morris/raphael.min.js"></script>
+    <script src="js/plugins/morris/morris.min.js"></script>
+    <script src="js/plugins/morris/morris-data.js"></script>
+
+</body>
+
+</html>
+
