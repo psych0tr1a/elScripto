@@ -1,15 +1,10 @@
 
-#Requirements:
-
-*Apache
-
-*SSL
-
-*PHP 
-
-*MySQL
+<b>Requirements:</b><br/>
+* Apache<br/>
+* SSL<br/>
+* PHP <br/>
+* MySQL<br/>
 
 
-#Installation:
-
+<b>#Installation:</b><br/>
 Just open index in browser and follow steps
