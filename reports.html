@@ -211,7 +211,7 @@ echo("                                <thead>
                                         <h4><b>Cookie:</b></h4> ".htmlspecialchars(htmlspecialchars($row["cookie"]))."<br><br>
                                         <h4><b>Storages:</b></h4> <br>Global Storage: ".htmlspecialchars(htmlspecialchars($row["storages"]))."<br><br>
                                         <h4><b>documentElement.innerHTML:</b></h4> <pre><code class=\"html\">".htmlspecialchars(htmlspecialchars($row["DOM"]))."</code></pre><br><br>
-                                        <h4><b>Screenshot:</b></h4> <div><img style=\"border: solid; width: 100%\" src=\"".urldecode(file_get_contents("./screenshots/".$row["screenshot"]))."\"></div> <br><br>
+                                        <h4><b>Screenshot:</b></h4> <div><img style=\"border: solid; width: 100%\" src=\"".htmlspecialchars(urldecode(file_get_contents("./screenshots/".$row["screenshot"])))."\"></div> <br><br>
                                         <h4><b>Message: </b></h4>".htmlspecialchars(htmlspecialchars($row["custom"]))."<br><br>
                                         </textarea>
                                     </tr>";
