@@ -6,16 +6,18 @@ if(file_exists("./config.html")){
 
 if(isset($_POST['config'])){
 
-	$servername = $_POST['dbhost'];
-	$username = $_POST['dbuser'];
-	$password = $_POST['dbpass'];
+	$servername = htmlspecialchars($_POST['dbhost'], ENT_QUOTES);
+	$username = htmlspecialchars($_POST['dbuser'], ENT_QUOTES);
+	$password = htmlspecialchars($_POST['dbpass'], ENT_QUOTES);
+	$adminlogin = htmlspecialchars($_POST['login'], ENT_QUOTES);
+	$adminpass = htmlspecialchars($_POST['password'], ENT_QUOTES);
 
 	$conn = new mysqli($servername, $username, $password);
 	if ($conn->connect_error) {
 		die("Connection failed: " . $conn->connect_error);
 	} 
 
-	$sql = "CREATE DATABASE elScripto";
+	$sql = "CREATE DATABASE elScripto1337";
 	if ($conn->query($sql) === TRUE) {
 		echo "Database created successfully<br>";
 	} else {
@@ -24,23 +26,24 @@ if(isset($_POST['config'])){
 
 	$conn->close();
 
-	$conn2 = new mysqli($servername, $username, $password, "elScripto");
+	$conn2 = new mysqli($servername, $username, $password, "elScripto1337");
 	if ($conn2->connect_error) {
 		die("Connection failed: " . $conn2->connect_error);
 	} 
 
 	$sql = "CREATE TABLE reports (
 		id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, 
-        date VARCHAR(20),
-        ip VARCHAR(15),
-        useragent BLOB,
-        referrer BLOB,
-		cookie MEDIUMTEXT,
-		storages MEDIUMTEXT,
-		DOM MEDIUMTEXT,
-        screenshot BLOB,
-        custom BLOB,
-        exploitid INT(6)
+	        date VARCHAR(20),
+	        ip VARCHAR(15),
+	        useragent BLOB,
+	        referrer BLOB,
+		cookie BLOB,
+		lstorage BLOB,
+		sstorage BLOB,
+		DOM BLOB,
+	        screenshot BLOB,
+	        custom BLOB,
+	        exploitid INT(6)
 	)";
 
 	$sql2 = "CREATE TABLE exploits (
@@ -74,7 +77,7 @@ if(isset($_POST['config'])){
 
 	$conn2->close();
 
-	$config = "<?php\n\$dblocation = \"".$_POST['dbhost']."\";\n\$dbuser = \"".$_POST['dbuser']."\";\n\$dbpass = \"".$_POST['dbpass']."\";\n\$dbname = \"elScripto\";\n\$adminlogin = \"".$_POST['login']."\";\n\$adminpass = \"".$_POST['password']."\";\n?>";
+	$config = "<?php\n\$dblocation = \"".$servername."\";\n\$dbuser = \"".$username."\";\n\$dbpass = \"".$password."\";\n\$dbname = \"elScripto1337\";\n\$adminlogin = \"".$adminlogin."\";\n\$adminpass = \"".$adminpass."\";\n?>";
 
 	file_put_contents ("./config.html", $config);
 
@@ -211,4 +214,3 @@ if(isset($_POST['config'])){
 </body>
 
 </html>
-
