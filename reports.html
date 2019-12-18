@@ -61,24 +61,8 @@ if ($conn->connect_error) {
         <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
         <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
-    <script>
-    function showExp(id){
-        $('#Report')[0].innerHTML = '               <form id="delete" method="post"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="' + id + '"></form>\
-                                <div class="btn-group btn-group-justified">\
-                                    <div class="btn-group">\
-                                        <button type="submit" class="btn btn-default btn-block" onclick="$(\'#Report\')[0].innerHTML=\'\'">Collapse report</button>\
-                                    </div>\
-                                    <div class="btn-group">\
-                                        <button form="delete" type="submit" class="btn btn-danger">Delete report</button>\
-                                    </div>\
-                                    \
-                                </div>\n' + $('#repid' + id)[0].value;
-        $('pre code').each(function(i, block) {
-            hljs.highlightBlock(block);
-        });
-    }
 
-    </script>
+    <script src="./js/scripts.js"></script>
 </head>
 
 <body>
@@ -187,6 +171,7 @@ $result = $conn->query($sql);
 if ($result->num_rows > 0) {                            
 echo("                                <thead>
                                     <tr>
+					<th></th>
                                         <th>Time</th>
                                         <th>Referer</th>
                                         <th>IP</th>
@@ -200,6 +185,7 @@ echo("                                <thead>
     // output data of each row
     while($row = $result->fetch_assoc()) {
         echo "                                    <tr onclick=\"showExp(".$row["id"].")\">
+					<td><form id=\"delete".$row["id"]."\" method=\"post\"><input type=\"hidden\" name=\"action\" value=\"delete\"><input type=\"hidden\" name=\"id\" value=\"".$row["id"]."\"></form><div class=\"btn-group\"><button onclick=\"\" form=\"delete\"".$row["id"]."\" type=\"submit\" class=\"btn btn-danger\">Delete</button></div></td>
                                         <td>".$row["date"]."</td>
                                         <td>".htmlspecialchars($row["referrer"])."</td>
                                         <td>".$row["ip"]."</td>
@@ -209,9 +195,10 @@ echo("                                <thead>
                                         <h4><b>Ip:</b></h4> ".$row["ip"]."<br><br>
                                         <h4><b>User-agent:</b></h4> ".htmlspecialchars(htmlspecialchars($row["useragent"]))."<br><br>
                                         <h4><b>Cookie:</b></h4> ".htmlspecialchars(htmlspecialchars($row["cookie"]))."<br><br>
-                                        <h4><b>Storages:</b></h4> <br>Global Storage: ".htmlspecialchars(htmlspecialchars($row["storages"]))."<br><br>
+                                        <h4><b>Local Storage:</b></h4> ".htmlspecialchars(htmlspecialchars($row["lstorage"]))."<br><br>
+                                        <h4><b>Session Storage:</b></h4> ".htmlspecialchars(htmlspecialchars($row["sstorage"]))."<br><br>
                                         <h4><b>documentElement.innerHTML:</b></h4> <pre><code class=\"html\">".htmlspecialchars(htmlspecialchars($row["DOM"]))."</code></pre><br><br>
-                                        <h4><b>Screenshot:</b></h4> <div><img style=\"border: solid; width: 100%\" src=\"".htmlspecialchars(urldecode(file_get_contents("./screenshots/".$row["screenshot"])))."\"></div> <br><br>
+                                        <h4><b>Screenshot:</b></h4> <div><img style=\"border: solid; width: 100%\" src=\"".urldecode(file_get_contents("./screenshots/".$row["screenshot"]))."\"></div> <br><br>
                                         <h4><b>Message: </b></h4>".htmlspecialchars(htmlspecialchars($row["custom"]))."<br><br>
                                         </textarea>
                                     </tr>";
