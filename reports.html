@@ -185,7 +185,7 @@ echo("                                <thead>
     // output data of each row
     while($row = $result->fetch_assoc()) {
         echo "                                    <tr onclick=\"showExp(".$row["id"].")\">
-					<td><form id=\"delete".$row["id"]."\" method=\"post\"><input type=\"hidden\" name=\"action\" value=\"delete\"><input type=\"hidden\" name=\"id\" value=\"".$row["id"]."\"></form><div class=\"btn-group\"><button onclick=\"\" form=\"delete\"".$row["id"]."\" type=\"submit\" class=\"btn btn-danger\">Delete</button></div></td>
+					<td><form id=\"delete".$row["id"]."\" method=\"post\"><input type=\"hidden\" name=\"action\" value=\"delete\"><input type=\"hidden\" name=\"id\" value=\"".$row["id"]."\"></form><div class=\"btn-group\"><button onclick=\"\" form=\"delete".$row["id"]."\" type=\"submit\" class=\"btn btn-danger\">Delete</button></div></td>
                                         <td>".$row["date"]."</td>
                                         <td>".htmlspecialchars($row["referrer"])."</td>
                                         <td>".$row["ip"]."</td>
